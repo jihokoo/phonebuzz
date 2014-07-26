@@ -2,7 +2,16 @@
 
 ### Required Configurations
 
-	* Navigate to [app.js](https://github.com/jihokoo/lendup/blob/master/app.js) in the root directory of this repository and input your `AUTH_TOKEN`. It is needed to validate the `X-Twilio-Signature` header. Thank you.
+	* Navigate to [app.js](https://github.com/jihokoo/lendup/blob/master/app.js) and input your `AUTH_TOKEN` (needed to validate the `X-Twilio-Signature` header):
+
+		app.all('*', function(req, res, next){
+			if (twilio.validateExpressRequest(req, 'ENTER_YOUR_AUTH_TOKEN_HERE')) {
+				next();
+		  }
+		  else {
+		    return res.send(403, 'Forbidden access. This application can only be accessed by Twilio.');
+		  }
+		});
 
 	* Please point your Twilio number to `http://aqueous-wave-1146.herokuapp.com/`. The request type can be either `POST` or `GET`.
 

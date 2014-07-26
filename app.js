@@ -21,16 +21,34 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+/*
+ *
+ *
+ *
+ *
+ *
+ */
+
 // Check for and validate X-Twilio-Signature header.
+// Input your AUTH_TOKEN below
 app.all('*', function(req, res, next){
-	// Input your AUTH_TOKEN below
-	if (twilio.validateExpressRequest(req, 'Enter_Your_AUTH_TOKEN_HERE')) {
+	if (twilio.validateExpressRequest(req, 'ENTER_YOUR_AUTH_TOKEN_HERE')) {
 		next();
   }
   else {
     return res.send(403, 'Forbidden access. This application can only be accessed by Twilio.');
   }
 });
+
+
+/*
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 app.use('/', routes);
 
