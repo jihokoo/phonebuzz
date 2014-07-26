@@ -23,7 +23,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Check for and validate X-Twilio-Signature header.
 app.all('*', function(req, res, next){
-	if (twilio.validateExpressRequest(req, '17ba3855de98bd943bfe87724c1c6365')) {
+	// Input your AUTH_TOKEN below
+	if (twilio.validateExpressRequest(req, 'Enter_Your_AUTH_TOKEN_HERE')) {
 		next();
   }
   else {
