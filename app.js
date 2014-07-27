@@ -32,12 +32,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Check for and validate X-Twilio-Signature header.
 // Input your AUTH_TOKEN below
 app.all('*', function(req, res, next){
-	if (twilio.validateExpressRequest(req, 'ENTER_YOUR_AUTH_TOKEN_HERE')) {
-		next();
-  }
-  else {
-    return res.send(403, 'Forbidden access. This application can only be accessed by Twilio.');
-  }
+	if ( req.path == '/' && req.method == 'GET') next();
+	if (twilio.validateExpressRequest(req, '17ba3855de98bd943bfe87724c1c6365')) next();
+  else return res.send(403, 'Forbidden access. This application can only be accessed by Twilio.');
 });
 
 

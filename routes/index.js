@@ -12,9 +12,9 @@ prompt.say('Welcome to PhoneBuzz!')
 		this.say('Please enter a whole number greater than zero, then press the hash symbol to submit.')
 	});
 
+/* GET home page. */
 router.get('/', function(req, res) {
-	res.writeHead(200, {'Content-Type': 'text/xml'});
-	res.end(prompt.toString());
+  res.render('index', { title: 'Express' });
 });
 
 router.post('/', function(req, res) {
