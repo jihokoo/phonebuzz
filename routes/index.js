@@ -2,8 +2,12 @@ var express = require('express');
 var router = express.Router();
 var twilio = require('twilio');
 
+// Twilio client object
+var client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+
 // Initial Prompt: XML response object
 var prompt = new twilio.TwimlResponse();
+
 prompt.say('Welcome to PhoneBuzz!')
 	.gather({
 		action: 'http://aqueous-wave-1146.herokuapp.com/phonebuzz',
@@ -12,17 +16,39 @@ prompt.say('Welcome to PhoneBuzz!')
 		this.say('Please enter a whole number greater than zero, then press the hash symbol to submit.')
 	});
 
+
+// Check for and validate X-Twilio-Signature header.
+var isAuthenticated = function(req, res, next) {
+	if (twilio.validateExpressRequest(req, process.env.AUTH_TOKEN)) next();
+  else next(new Error('Forbidden Access', 403));
+};
+
 /* GET home page. */
 router.get('/', function(req, res) {
   res.render('index', { title: 'Express' });
 });
 
-router.post('/', function(req, res) {
+/* POST to root url and receive TwiML response (should be GET, but I wanted to use the root URL) */
+router.post('/', isAuthenticated, function(req, res) {
 	res.writeHead(200, {'Content-Type': 'text/xml'});
 	res.end(prompt.toString());
 });
 
-router.post('/phonebuzz', function(req, res) {
+/* Post user phone number to make call */
+router.post('/call', function(req, res) {
+	var userNumber = req.body.userNumber;
+  client.makeCall({
+    to:'+12015759813', // Any number Twilio can call
+    from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
+    url: 'http://aqueous-wave-1146.herokuapp.com/' // A URL that produces an XML document (TwiML) which contains instructions for the call
+	}, function(err, responseData) {
+    // function is executed when the call has been initiated.
+    res.send(200);
+	});
+});
+
+/* Post user input gathered during Twilio call */
+router.post('/phonebuzz', isAuthenticated, function(req, res) {
 	// FizzBuzz Result: XML response object
 	var fizzBuzz = new twilio.TwimlResponse();
 	var result = '';

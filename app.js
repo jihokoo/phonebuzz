@@ -4,7 +4,6 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var twilio = require('twilio');
 
 var routes = require('./routes/index');
 
@@ -20,32 +19,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-/*
- *
- *
- *
- *
- *
- */
-
-// Check for and validate X-Twilio-Signature header.
-// Input your AUTH_TOKEN below
-app.all('*', function(req, res, next){
-	if ( req.path == '/' && req.method == 'GET') next();
-	if (twilio.validateExpressRequest(req, '17ba3855de98bd943bfe87724c1c6365')) next();
-  else return res.send(403, 'Forbidden access. This application can only be accessed by Twilio.');
-});
-
-
-/*
- *
- *
- *
- *
- *
- *
- */
 
 app.use('/', routes);
 

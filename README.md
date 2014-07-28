@@ -1,38 +1,23 @@
-# PhoneBuzz (FizzBuzz over the phone)
+# PhoneBuzz
 
-### Required Configurations
+Twilio cannot normally make requests to localhost because we are on two different networks, so I am hosting this application on Heroku. This means that for the X-Twilio-Signature validation check to work and for the application to make calls, the user needs to set his/her own Twilio account credentials on Heroku.
+I will need the reviewer's email so I can add him/her as a collaborator on Heroku to change config variables.
 
-* Clone the application.
+* Log-on to Heroku
+* Click on acqueous-wave-1146 (the name Heroku gave my application)
+* Go to Settings on the application's dash board
+* Look at the row that says Config Variables in white and click 'Reveal config vars' to the right
+* Then manually edit the three variables which can be found on your Twilio account dashboard. (start TWILIO_NUMBER with +1 and then the 10 digit phone number)
 
-* Navigate to [app.js](https://github.com/jihokoo/lendup/blob/master/app.js) and input your `AUTH_TOKEN` (needed to validate the `X-Twilio-Signature` header):
+## For Phase 1
 
-	app.all('*', function(req, res, next){
-		if (twilio.validateExpressRequest(req, 'ENTER_YOUR_AUTH_TOKEN_HERE')) {
-			next();
-	  }
-	  else {
-	    return res.send(403, 'Forbidden access. This application can only be accessed by Twilio.');
-	  }
-	});
+* Make sure to configure your Twilio number and point it to 'http://aqueous-wave-1146.herokuapp.com/'
+* The request type be must be `POST`
+* Call your Twilio number to play PhoneBuzz
 
-* Please point your Twilio number to `http://aqueous-wave-1146.herokuapp.com/`. The request type can be either `POST` or `GET`.
+## For Phase 2
 
-* Twilio cannot make requests to localhost because we are most likely on two different networks, so I am hosting this application on Heroku. This means that for the X-Twilio-Signature validation check to work, the user needs to deploy to Heroku after making the changes noted in the two bullet points directly above. (I will need to add the reviewer for his/her Github and Heroku username/email to add the person as a contributor)
-
-* Finally, run...
-
-```bash
-$ npm git add .
-```
-```bash
-$ npm git commit .
-```
-```bash
-$ npm git push .
-```
-```bash
-$ npm git push heroku master .
-```
-
+* Go to this application's [homepage]('http://aqueous-wave-1146.herokuapp.com/') on your browser
+* Enter your personal phone number and press submit to play PhoneBuzz
 
 # Thank you!
