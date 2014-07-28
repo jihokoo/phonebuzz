@@ -9,13 +9,13 @@ I will need the reviewer's email so I can add him/her as a collaborator on Herok
 * Look at the row that says Config Variables in white and click 'Reveal config vars' to the right
 * Then manually edit the three variables which can be found on your Twilio account dashboard. (start TWILIO_NUMBER with +1 and then the 10 digit phone number)
 
-## For Phase 1
+## Phase 1 - Complete
 
 * Make sure to configure your Twilio number and point it to 'http://aqueous-wave-1146.herokuapp.com/'
 * The request type be must be `POST`
 * Call your Twilio number to play PhoneBuzz
 
-## For Phase 2
+## Phase 2 - Complete
 
 * Go to this application's [homepage]('http://aqueous-wave-1146.herokuapp.com/') on your browser
 * Enter your personal phone number and press submit to play PhoneBuzz
