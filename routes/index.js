@@ -38,7 +38,7 @@ router.post('/', isAuthenticated, function(req, res) {
 router.post('/call', function(req, res) {
 	var userNumber = req.body.userNumber;
   client.makeCall({
-    to:'+12015759813', // Any number Twilio can call
+    to:'+1'+userNumber, // Any number Twilio can call
     from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
     url: 'http://aqueous-wave-1146.herokuapp.com/' // A URL that produces an XML document (TwiML) which contains instructions for the call
 	}, function(err, responseData) {

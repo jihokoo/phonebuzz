@@ -1,7 +1,6 @@
 (function($) {
 	
 	$.fn.bar = function(options) {
-		console.log('running this function');
 		var opts = $.extend({}, $.fn.bar.defaults, options);
 		return this.each(function() {
 			$this = $(this);
