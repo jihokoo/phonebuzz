@@ -37,20 +37,24 @@ router.get('/', function(req, res) {
 
 /* POST to root url and receive TwiML response */
 router.post('/', isAuthenticated, function(req, res) {
-	var call = req.query.id;
+	console.log(req.query);
+	var call = req.query && req.query.id;
 	var from = req.body.From;
 	var to = req.body.To;
 	var prompt = new twilio.TwimlResponse();
+	// If call id was specified in query parameters
+	// Otherwise the call was made by calling the Twilio Number
 	if(call){
 		Call.findOne({_id: call}, function(err, call){
 			// Initial Prompt: XML response object
 			prompt.say('Welcome to PhoneBuzz!');
-
+			// If the call is a replay, then we do not need user input for FizzBuzz
 			if(call.countTo){
-				prompt.say('FizzBuzz has been calculated. The answer is.')
+				prompt.say('You previously entered'+ call.countTo +'. The answer is.')
 					.pause({ length: 1 })
 					.say(calculate(call.countTo));
 			} else{
+				// Give instruction in TwiML to gather user input.
 				prompt.gather({
 						action: 'http://aqueous-wave-1146.herokuapp.com/phonebuzz?id='+call.id,
 						finishOnKey: '#'
@@ -58,18 +62,21 @@ router.post('/', isAuthenticated, function(req, res) {
 						this.say('Please enter a whole number greater than zero, then press the hash symbol to submit.')
 					});
 			}
+			// Send response to Twilio in TwiML
 			res.writeHead(200, {'Content-Type': 'text/xml'});
 			res.end(prompt.toString());
 		});
 	} else{
+		// This is when the user dials the Twilio number.
 		prompt.say('Welcome to PhoneBuzz!')
 			.gather({
-				action: 'http://aqueous-wave-1146.herokuapp.com/phonebuzz?id='+call.id,
+				action: 'http://aqueous-wave-1146.herokuapp.com/phonebuzz',
 				finishOnKey: '#'
 			}, function() {
 				this.say('Please enter a whole number greater than zero, then press the hash symbol to submit.')
 			});
 		res.writeHead(200, {'Content-Type': 'text/xml'});
+		// Send response to Twilio in TwiML
 		res.end(prompt.toString());
 	}
 });
@@ -111,6 +118,7 @@ router.post('/phonebuzz', isAuthenticated, function(req, res) {
 	var countTo = parseInt(req.body.Digits);
 	if(req.body.Digits){
 		Call.findOne({_id: call}, function(err, call){
+			// Only 
 			if(call){
 				call.countTo = countTo;
 				call.save();
@@ -144,8 +152,8 @@ router.post('/replay', function(req, res){
 		newCall.save();
 
 		client.makeCall({
-	    to:'+1'+call.to, // Any number Twilio can call
-	    from: '+1'+call.from, // A number you bought from Twilio and can use for outbound communication
+	    to:'+1'+call.to,
+	    from: '+1'+call.from, // Twilio Number
 	    url: 'http://aqueous-wave-1146.herokuapp.com/?id=' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
 		}, function(err, responseData) {
 	    // function is executed when the call has been initiated.
