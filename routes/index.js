@@ -2,8 +2,13 @@ var express = require('express');
 var router = express.Router();
 var twilio = require('twilio');
 
+// Twilio credentials
+var ACCOUNT_SID = 'AC463a95df38873bafbd05da055f830807';
+var AUTH_TOKEN = '17ba3855de98bd943bfe87724c1c6365';
+var TWILIO_NUMBER = '+12014307826';
+
 // Twilio client object
-var client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+var client = twilio(ACCOUNT_SID, AUTH_TOKEN);
 
 // Initial Prompt: XML response object
 var prompt = new twilio.TwimlResponse();
@@ -19,7 +24,7 @@ prompt.say('Welcome to PhoneBuzz!')
 
 // Check for and validate X-Twilio-Signature header.
 var isAuthenticated = function(req, res, next) {
-	if (twilio.validateExpressRequest(req, process.env.AUTH_TOKEN)) next();
+	if (twilio.validateExpressRequest(req, AUTH_TOKEN)) next();
   else next(new Error('Forbidden Access', 403));
 };
 
@@ -37,14 +42,19 @@ router.post('/', isAuthenticated, function(req, res) {
 /* Post user phone number to make call */
 router.post('/call', function(req, res) {
 	var userNumber = req.body.userNumber;
-  client.makeCall({
-    to:'+1'+userNumber, // Any number Twilio can call
-    from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
-    url: 'http://aqueous-wave-1146.herokuapp.com/' // A URL that produces an XML document (TwiML) which contains instructions for the call
-	}, function(err, responseData) {
-    // function is executed when the call has been initiated.
-    res.send(200);
-	});
+	var pauseTime = parseInt(req.body.pause) * 1000; // change seconds to milliseconds
+
+	setTimeout(function(){ 
+		client.makeCall({
+	    to:'+1'+userNumber, // Any number Twilio can call
+	    from: TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
+	    url: 'http://aqueous-wave-1146.herokuapp.com/' // A URL that produces an XML document (TwiML) which contains instructions for the call
+		}, function(err, responseData) {
+	    // function is executed when the call has been initiated.
+	    res.send(200);
+		});
+	}, pauseTime); // pause interval before the anonymous function inside setTimeout is run
+	
 });
 
 /* Post user input gathered during Twilio call */

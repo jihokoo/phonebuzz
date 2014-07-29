@@ -1,6 +1,5 @@
 $(document).ready(function(){
   $('.phone_us').mask('+1 (000) 000-0000');
-  console.log('hellllooooo');
 
   $('#success').bar({
     color        : '#1E90FF',
@@ -21,10 +20,27 @@ $(document).ready(function(){
   });
 
   var numberValidation = /^[(]{0,1}[0-9]{3}[)\.\- ]{0,1}[0-9]{3}[\.\- ]{0,1}[0-9]{4}$/;
+
+  var countDelay = function(){
+    var totalTime = 0;
+    var hours = parseInt($('#hours').val()) || 0;
+    var minutes = parseInt($('#minutes').val()) || 0;
+    var seconds = parseInt($('#seconds').val()) || 0;
+    totalTime = (hours*120) + (minutes*60) + seconds;
+    return totalTime;
+  }
+
+  $('.time').keyup(function () { 
+    this.value = this.value.replace(/[^0-9\.]/g,'');
+  });
+
   $('#submit').click(function(e){
     if(numberValidation.test($('.phone_us').cleanVal())){
-      $.post( "/call", {userNumber: $('.phone_us').cleanVal()}, function( data ) {
+      $.post( "/call", {userNumber: $('.phone_us').cleanVal(), pause: countDelay()}, function( data ) {
         $('.phone_us').val('')
+        $('#hours').val('')
+        $('#minutes').val('')
+        $('#seconds').val('')
         $('#success').click();
       });
     } else{

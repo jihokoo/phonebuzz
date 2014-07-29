@@ -69,12 +69,10 @@ h5 {
 }
 
 // Generic
-.center {
-  display: inline-block;
-  padding-left: none;
-  padding-right: none;
+#hello {
   margin-left: auto;
   margin-right: auto;
+  width: 50%;
 }
 
 // SITE-WIDE
@@ -367,6 +365,18 @@ a.jbar-cross:hover{
 .jbar-bottom a.jbar-cross{
 	bottom:8px;
 }
+
+input[class=time]{
+    font-size:1em;
+    padding:3px;
+    margin:0;
+    width: 20%;
+    margin-top: 15px;
+    border:1px solid #ddd;
+    border-radius:5px;
+    text-align:center;
+}
+
 
 /* Smartphones (portrait and landscape) ----------- */
 @media only screen

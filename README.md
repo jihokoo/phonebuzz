@@ -20,4 +20,10 @@ I will need the reviewer's email so I can add him/her as a collaborator on Herok
 * Go to this application's [homepage]('http://aqueous-wave-1146.herokuapp.com/') on your browser
 * Enter your personal phone number and press submit to play PhoneBuzz
 
+## Phase 3 - Complete
+
+* Go to this application's [homepage]('http://aqueous-wave-1146.herokuapp.com/') on your browser
+* Enter your personal phone number
+* Enter pause time (default is to make call immediately)
+
 # Thank you!
