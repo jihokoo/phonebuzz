@@ -18,7 +18,10 @@ var Schema = mongoose.Schema
  * Call Schema
  */
 var CallSchema = new Schema({
-    callTime: Date,
+    callTime: {
+        type: Date,
+        default: Date.now
+    },
     delay: Number,
     from: String,
     countTo: Number

@@ -7,18 +7,6 @@ var Call = require('../models/calls.js')['Call']
 // Twilio client object
 var client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
 
-// Initial Prompt: XML response object
-var prompt = new twilio.TwimlResponse();
-
-prompt.say('Welcome to PhoneBuzz!')
-	.gather({
-		action: 'http://aqueous-wave-1146.herokuapp.com/phonebuzz',
-		finishOnKey: '#'
-	}, function() {
-		this.say('Please enter a whole number greater than zero, then press the hash symbol to submit.')
-	});
-
-
 // Check for and validate X-Twilio-Signature header.
 var isAuthenticated = function(req, res, next) {
 	if (twilio.validateExpressRequest(req, process.env.AUTH_TOKEN)) next();
@@ -32,7 +20,26 @@ router.get('/', function(req, res) {
 
 /* POST to root url and receive TwiML response (should be GET, but I wanted to use the root URL) */
 router.post('/', isAuthenticated, function(req, res) {
-	console.log(req.body);
+	var call = req.query.id;
+	var from = req.body.From;
+	
+	if(!call){
+		call = new Call({delay: 0, from: from.substring(2)});
+		call.save();
+		call = call.id;
+	}
+
+	// Initial Prompt: XML response object
+	var prompt = new twilio.TwimlResponse();
+
+	prompt.say('Welcome to PhoneBuzz!')
+		.gather({
+			action: 'http://aqueous-wave-1146.herokuapp.com/phonebuzz?id='+call,
+			finishOnKey: '#'
+		}, function() {
+			this.say('Please enter a whole number greater than zero, then press the hash symbol to submit.')
+		});
+
 	res.writeHead(200, {'Content-Type': 'text/xml'});
 	res.end(prompt.toString());
 });
@@ -44,8 +51,12 @@ router.post('/call', function(req, res) {
 
 	var callTime = new moment();
 
-	var newCall = new Call({delay: delayTime, from: userNumber});
-	newCall.callTime = callTime.add('seconds', delayTime).utc().toDate();
+	var newCall = new Call({
+									delay: delayTime, 
+									from: userNumber, 
+									callTime: callTime.add('seconds', delayTime).utc().toDate()
+								});
+
 	newCall.save(); // save to database
 
 	setTimeout(function(){ 
@@ -70,7 +81,12 @@ router.post('/phonebuzz', isAuthenticated, function(req, res) {
 	// FizzBuzz Result: XML response object
 	var fizzBuzz = new twilio.TwimlResponse();
 	var result = '';
+	var call = req.query.id;
 	if(req.body.Digits){
+		Call.findOne({id: call}, function(err, call){
+			call.countTo = parseInt(req.body.Digits);
+			call.save();
+		});
 		// Main logic for FizzBuzz
 		for(var i = 1; i < parseInt(req.body.Digits) + 1; i++){
 			result += (i%3? '' : 'Fizz') + (i%5? '' : 'Buzz') || i;
