@@ -4,17 +4,12 @@ var twilio = require('twilio');
 var moment = require('moment');
 var Call = require('../models/calls.js')['Call']
 
-// Twilio credentials
-var ACCOUNT_SID = 'AC463a95df38873bafbd05da055f830807';
-var AUTH_TOKEN = '17ba3855de98bd943bfe87724c1c6365';
-var TWILIO_NUMBER = '+12014307826';
-
 // Twilio client object
-var client = twilio(ACCOUNT_SID, AUTH_TOKEN);
+var client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
 
 /* Check for and validate X-Twilio-Signature header. */
 var isAuthenticated = function(req, res, next) {
-	if (twilio.validateExpressRequest(req, AUTH_TOKEN)) next();
+	if (twilio.validateExpressRequest(req, process.env.AUTH_TOKEN)) next();
   else next(new Error('Forbidden Access', 403));
 };
 
@@ -90,7 +85,7 @@ router.post('/call', function(req, res) {
 
 	var newCall = new Call({
 		delay: delayTime, 
-		from: TWILIO_NUMBER.substring(2), 
+		from: process.env.TWILIO_NUMBER.substring(2), 
 		to: userNumber,
 		callTime: callTime.add('seconds', delayTime).utc().toDate()
 	});
@@ -98,11 +93,13 @@ router.post('/call', function(req, res) {
 	newCall.save(); // save to database
 
 	setTimeout(function(){ 
+		// Make call from Twilio number to the user inputted number
 		client.makeCall({
 	    to:'+1'+userNumber, // Any number Twilio can call
-	    from: TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
+	    from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
 	    url: 'http://aqueous-wave-1146.herokuapp.com/?id=' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
 		}, function(err, responseData) {
+			if(err) console.log(err);
 	    // function is executed when the call has been initiated.
 		});
 	}, delayTime * 1000); // delay interval in milliseconds before the anonymous function inside setTimeout is run
@@ -118,7 +115,8 @@ router.post('/phonebuzz', isAuthenticated, function(req, res) {
 	var countTo = parseInt(req.body.Digits);
 	if(req.body.Digits){
 		Call.findOne({_id: call}, function(err, call){
-			// Only 
+			// Only if call is defined
+			// This is for the case that the call is made to Twilio number
 			if(call){
 				call.countTo = countTo;
 				call.save();
@@ -127,12 +125,15 @@ router.post('/phonebuzz', isAuthenticated, function(req, res) {
 
 		fizzBuzz.say('FizzBuzz has been calculated. The answer is.')
 			.pause({ length: 1 })
-			.say(calculate(countTo)+'.')
+			.say(calculate(countTo)+'.') // The function is at the top of this document
 			.say('Thank you!');
+
 		res.writeHead(200, {'Content-Type': 'text/xml'});
 		res.end(fizzBuzz.toString());
 	} else{
+		// In case the user inputs zero, which is not allowed in FizzBuzz
 		fizzBuzz.say('Sorry. Next time please enter a whole number greater than zero.');
+
 		res.writeHead(200, {'Content-Type': 'text/xml'});
 		res.end(fizzBuzz.toString());
 	}
@@ -142,7 +143,9 @@ router.post('/replay', function(req, res){
 	var id = req.body.id;
 	var newCall;
 
+	// Find the old call by its id in the database
 	Call.findOne({_id: id}, function(err, call){
+		// Create a new object with the same exact data, but different id
 		newCall = new Call({
 			delay: call.delay, 
 			from: call.from, 
@@ -156,6 +159,7 @@ router.post('/replay', function(req, res){
 	    from: '+1'+call.from, // Twilio Number
 	    url: 'http://aqueous-wave-1146.herokuapp.com/?id=' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
 		}, function(err, responseData) {
+			if(err) console.log(err);
 	    // function is executed when the call has been initiated.
 		});
 	});

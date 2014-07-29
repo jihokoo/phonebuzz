@@ -1,5 +1,6 @@
 $(document).ready(function(){
 
+  /* Function to make MongooseJS date more friendly */
   var parseDate = function(created_at){
     // convert to local string and remove seconds and year //
     var date = new Date(Date.parse(created_at)).toLocaleString().substr(0, 16);
@@ -31,15 +32,10 @@ $(document).ready(function(){
     $('.calls-container').append(htmlString);
   })(calls);
 
-  $('.individual-call').click(function(){
-    $.post( "/replay", {id: this.id}, function( data ) {
-      $('#success').click();
-    });
-    return false;
-  });
-
+  // Using jQuery plugin to auto format the phone number
   $('.phone_us').mask('+1 (000) 000-0000');
 
+  // Alert when call succeeds
   $('#success').bar({
     color        : '#1E90FF',
     background_color : '#FFFFFF',
@@ -49,6 +45,7 @@ $(document).ready(function(){
     time       : 4000
   });
 
+  // Alert when phone number is incorrect
   $('#failure').bar({
     color        : '#fff',
     background_color : '#ff827f',
@@ -58,8 +55,10 @@ $(document).ready(function(){
     time       : 4000
   });
 
+  // RegEXP for making sure the phone number is legit.
   var numberValidation = /^[(]{0,1}[0-9]{3}[)\.\- ]{0,1}[0-9]{3}[\.\- ]{0,1}[0-9]{4}$/;
 
+  /* Convert time to seconds */
   var countDelay = function(){
     var totalTime = 0;
     var hours = parseInt($('#hours').val()) || 0;
@@ -67,19 +66,21 @@ $(document).ready(function(){
     var seconds = parseInt($('#seconds').val()) || 0;
     totalTime = (hours*120) + (minutes*60) + seconds;
     return totalTime;
-  }
+  };
 
+  /* Function to make sure the time input is integer */
   $('.time').keyup(function () { 
     this.value = this.value.replace(/[^0-9\.]/g,'');
   });
 
+  /* Post user input on clicking submit button */
   $('#submit').click(function(e){
     if(numberValidation.test($('.phone_us').cleanVal())){
       $.post( "/call", {userNumber: $('.phone_us').cleanVal(), delay: countDelay()}, function( data ) {
-        $('.phone_us').val('')
-        $('#hours').val('')
-        $('#minutes').val('')
-        $('#seconds').val('')
+        $('.phone_us').val('');
+        $('#hours').val('');
+        $('#minutes').val('');
+        $('#seconds').val('');
         $('#success').click();
       });
     } else{
@@ -87,5 +88,13 @@ $(document).ready(function(){
     }
     
     return false;
-  })
+  });
+
+  /* Replay call on clicking replay button */
+  $('.individual-call').click(function(){
+    $.post( "/replay", {id: this.id}, function( data ) {
+      $('#success').click();
+    });
+    return false;
+  });
 });
