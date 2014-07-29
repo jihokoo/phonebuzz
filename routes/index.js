@@ -18,13 +18,17 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Express' });
 });
 
-/* POST to root url and receive TwiML response (should be GET, but I wanted to use the root URL) */
+/* POST to root url and receive TwiML response */
 router.post('/', isAuthenticated, function(req, res) {
 	var call = req.query.id;
 	var from = req.body.From;
-
+	var to = req.body.To;
 	if(!call){
-		call = new Call({delay: 0, from: from.substring(2)});
+		call = new Call({
+			delay: 0, 
+			to: to.substring(2), 
+			from: from.substring(2)
+		});
 		call.save();
 		call = call.id;
 	}
@@ -52,10 +56,11 @@ router.post('/call', function(req, res) {
 	var callTime = new moment();
 
 	var newCall = new Call({
-									delay: delayTime, 
-									from: userNumber, 
-									callTime: callTime.add('seconds', delayTime).utc().toDate()
-								});
+		delay: delayTime, 
+		from: process.env.TWILIO_NUMBER, 
+		to: userNumber,
+		callTime: callTime.add('seconds', delayTime).utc().toDate()
+	});
 
 	newCall.save(); // save to database
 
@@ -72,29 +77,31 @@ router.post('/call', function(req, res) {
 	res.send(200);
 });
 
-// replay will dial the same phone number, but if the call has
-// been made before, we just replay the result, instead of 
-// asking for input
+/* Main logic for FizzBuzz */
+var calculate = function(countTo){
+	var result = '';
+	for(var i = 1; i < countTo + 1; i++){
+		result += (i%3? '' : 'Fizz') + (i%5? '' : 'Buzz') || i;
+		result += ' ';
+	}
+	return result;
+}
 
 /* Post user input gathered during Twilio call */
 router.post('/phonebuzz', isAuthenticated, function(req, res) {
 	// FizzBuzz Result: XML response object
 	var fizzBuzz = new twilio.TwimlResponse();
-	var result = '';
 	var call = req.query.id;
+	var countTo = parseInt(req.body.Digits);
 	if(req.body.Digits){
 		Call.findOne({_id: call}, function(err, call){
-			call.countTo = parseInt(req.body.Digits);
+			call.countTo = countTo;
 			call.save();
 		});
-		// Main logic for FizzBuzz
-		for(var i = 1; i < parseInt(req.body.Digits) + 1; i++){
-			result += (i%3? '' : 'Fizz') + (i%5? '' : 'Buzz') || i;
-			result += ' ';
-		}
+
 		fizzBuzz.say('FizzBuzz has been calculated. The answer is.')
 			.pause({ length: 2 })
-			.say(result);
+			.say(calculate(countTo));
 		res.writeHead(200, {'Content-Type': 'text/xml'});
 		res.end(fizzBuzz.toString());
 	} else{
@@ -103,5 +110,33 @@ router.post('/phonebuzz', isAuthenticated, function(req, res) {
 		res.end(fizzBuzz.toString());
 	}
 });
+
+router.post('/replay', function(req, res){
+	var id = req.body.id;
+	var newCall;
+
+	Call.findOne({_id: id}, function(err, call){
+		
+		newCall = new Call({
+			delay: call.delay, 
+			from: call.from, 
+			countTo: call.countTo
+			to: call.to
+		});
+
+		newCall.save();
+	});
+
+	client.makeCall({
+    to:'+1'+call.to, // Any number Twilio can call
+    from: '+1'+call.from, // A number you bought from Twilio and can use for outbound communication
+    url: 'http://aqueous-wave-1146.herokuapp.com/?id=' + call.id // A URL that produces an XML document (TwiML) which contains instructions for the call
+	}, function(err, responseData) {
+    // function is executed when the call has been initiated.
+	});
+
+	res.send(200);
+
+})
 
 module.exports = router;

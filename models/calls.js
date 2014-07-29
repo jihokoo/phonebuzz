@@ -24,6 +24,7 @@ var CallSchema = new Schema({
     },
     delay: Number,
     from: String,
+    to: String,
     countTo: Number
 });
 
