@@ -1,5 +1,4 @@
 $(document).ready(function(){
-  console.log(window.calls);
 
   var parseDate = function(created_at){
     // convert to local string and remove seconds and year //
