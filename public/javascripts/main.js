@@ -36,7 +36,7 @@ $(document).ready(function(){
 
   $('#submit').click(function(e){
     if(numberValidation.test($('.phone_us').cleanVal())){
-      $.post( "/call", {userNumber: $('.phone_us').cleanVal(), pause: countDelay()}, function( data ) {
+      $.post( "/call", {userNumber: $('.phone_us').cleanVal(), delay: countDelay()}, function( data ) {
         $('.phone_us').val('')
         $('#hours').val('')
         $('#minutes').val('')

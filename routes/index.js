@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var twilio = require('twilio');
+var moment = require('moment');
+var Call = require('../models/calls.js')['Call']
 
 // Twilio client object
 var client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
@@ -30,6 +32,7 @@ router.get('/', function(req, res) {
 
 /* POST to root url and receive TwiML response (should be GET, but I wanted to use the root URL) */
 router.post('/', isAuthenticated, function(req, res) {
+	console.log(req.body);
 	res.writeHead(200, {'Content-Type': 'text/xml'});
 	res.end(prompt.toString());
 });
@@ -37,20 +40,30 @@ router.post('/', isAuthenticated, function(req, res) {
 /* Post user phone number to make call */
 router.post('/call', function(req, res) {
 	var userNumber = req.body.userNumber;
-	var pauseTime = parseInt(req.body.pause) * 1000; // change seconds to milliseconds
+	var delayTime = parseInt(req.body.delay);
+
+	var callTime = new moment();
+
+	var newCall = new Call({delay: delayTime, from: userNumber});
+	newCall.callTime = callTime.add('seconds', delayTime).utc().toDate();
+	newCall.save(); // save to database
 
 	setTimeout(function(){ 
 		client.makeCall({
 	    to:'+1'+userNumber, // Any number Twilio can call
 	    from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
-	    url: 'http://aqueous-wave-1146.herokuapp.com/' // A URL that produces an XML document (TwiML) which contains instructions for the call
+	    url: 'http://aqueous-wave-1146.herokuapp.com/' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
 		}, function(err, responseData) {
 	    // function is executed when the call has been initiated.
 		});
-	}, pauseTime); // pause interval before the anonymous function inside setTimeout is run
+	}, delayTime * 1000); // delay interval in milliseconds before the anonymous function inside setTimeout is run
 	
 	res.send(200);
 });
+
+// replay will dial the same phone number, but if the call has
+// been made before, we just replay the result, instead of 
+// asking for input
 
 /* Post user input gathered during Twilio call */
 router.post('/phonebuzz', isAuthenticated, function(req, res) {
