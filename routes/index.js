@@ -4,12 +4,17 @@ var twilio = require('twilio');
 var moment = require('moment');
 var Call = require('../models/calls.js')['Call']
 
+// Twilio credentials
+var ACCOUNT_SID = 'AC463a95df38873bafbd05da055f830807';
+var AUTH_TOKEN = '17ba3855de98bd943bfe87724c1c6365';
+var TWILIO_NUMBER = '+12014307826';
+
 // Twilio client object
-var client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+var client = twilio(ACCOUNT_SID, AUTH_TOKEN);
 
 /* Check for and validate X-Twilio-Signature header. */
 var isAuthenticated = function(req, res, next) {
-	if (twilio.validateExpressRequest(req, process.env.AUTH_TOKEN)) next();
+	if (twilio.validateExpressRequest(req, AUTH_TOKEN)) next();
   else next(new Error('Forbidden Access', 403));
 };
 
@@ -26,6 +31,7 @@ var calculate = function(countTo){
 /* GET home page and list of past calls. */
 router.get('/', function(req, res) {
 	Call.find(function(err, calls){
+		console.log(calls);
 		res.render('index', { calls: calls });
 	});
 });
@@ -78,7 +84,7 @@ router.post('/call', function(req, res) {
 
 	var newCall = new Call({
 		delay: delayTime, 
-		from: process.env.TWILIO_NUMBER, 
+		from: TWILIO_NUMBER, 
 		to: userNumber,
 		callTime: callTime.add('seconds', delayTime).utc().toDate()
 	});
@@ -88,7 +94,7 @@ router.post('/call', function(req, res) {
 	setTimeout(function(){ 
 		client.makeCall({
 	    to:'+1'+userNumber, // Any number Twilio can call
-	    from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
+	    from: TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
 	    url: 'http://aqueous-wave-1146.herokuapp.com/?id=' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
 		}, function(err, responseData) {
 	    // function is executed when the call has been initiated.
@@ -132,7 +138,7 @@ router.post('/replay', function(req, res){
 		newCall = new Call({
 			delay: call.delay, 
 			from: call.from, 
-			countTo: call.countTo
+			countTo: call.countTo,
 			to: call.to
 		});
 		newCall.save();
@@ -146,10 +152,7 @@ router.post('/replay', function(req, res){
 		});
 	});
 
-	router.post('/replay')
-
 	res.send(200);
-
-})
+});
 
 module.exports = router;

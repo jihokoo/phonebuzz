@@ -2,3 +2,5 @@ extends layout
 
 block content
 	include ../public/views/home.html
+	script(type='text/javascript').
+		window.calls = !{JSON.stringify(calls)};

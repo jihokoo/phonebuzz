@@ -4,8 +4,8 @@
  * Module dependencies.
  */
 var mongoose = require('mongoose');
-// mongoose.connect('mongodb://localhost/lendup_final');
-mongoose.connect('mongodb://heroku_app27829266:lihouivtsc3h8h1rugu99u7mjk@ds053429.mongolab.com:53429/heroku_app27829266');
+mongoose.connect('mongodb://localhost/lendup_final');
+// mongoose.connect('mongodb://heroku_app27829266:lihouivtsc3h8h1rugu99u7mjk@ds053429.mongolab.com:53429/heroku_app27829266');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function callback () {

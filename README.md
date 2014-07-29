@@ -26,4 +26,9 @@ I will need the reviewer's email so I can add him/her as a collaborator on Herok
 * Enter your personal phone number
 * Enter pause time (default is to make call immediately) and press submit to play
 
+## Phase 4 - Complete
+
+* Same steps as Phase 3
+* Now you can press the replay button on populated list of past calls
+
 # Thank you!
