@@ -52,7 +52,7 @@ router.post('/call', function(req, res) {
 		client.makeCall({
 	    to:'+1'+userNumber, // Any number Twilio can call
 	    from: process.env.TWILIO_NUMBER, // A number you bought from Twilio and can use for outbound communication
-	    url: 'http://aqueous-wave-1146.herokuapp.com/' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
+	    url: 'http://aqueous-wave-1146.herokuapp.com/?id=' + newCall.id // A URL that produces an XML document (TwiML) which contains instructions for the call
 		}, function(err, responseData) {
 	    // function is executed when the call has been initiated.
 		});
