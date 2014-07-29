@@ -22,7 +22,7 @@ router.get('/', function(req, res) {
 router.post('/', isAuthenticated, function(req, res) {
 	var call = req.query.id;
 	var from = req.body.From;
-	
+
 	if(!call){
 		call = new Call({delay: 0, from: from.substring(2)});
 		call.save();
@@ -83,7 +83,7 @@ router.post('/phonebuzz', isAuthenticated, function(req, res) {
 	var result = '';
 	var call = req.query.id;
 	if(req.body.Digits){
-		Call.findOne({id: call}, function(err, call){
+		Call.findOne({_id: call}, function(err, call){
 			call.countTo = parseInt(req.body.Digits);
 			call.save();
 		});
